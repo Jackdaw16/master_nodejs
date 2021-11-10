@@ -9,8 +9,13 @@ const app = express();
 
 //Middlewares (funciones que se ejecutan antes de que lleguen a las rutas)
 app.use(express.json());
+
+require('./db');
+
 app.use(cors());
+
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api', employedRoutes.routes);
 

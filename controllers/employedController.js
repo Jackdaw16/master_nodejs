@@ -1,56 +1,35 @@
 'use strict';
 
-const employed = require('../models/employed');
-
-const mysql = require('mysql');
-const config = require('../config');
-const mysqlConnection = mysql.createConnection(config.databaseConfig);
-
-mysqlConnection.connect(function (error) {
-    if (error){
-        console.log(error);
-    } else {
-        console.log('Database connected');
-    }
-});
+const { Employed } = require('../db');
 
 const getAllEmployed = async (request, response) => {
   try {
-      await mysqlConnection.query('select * from employees', (error, rows, fields) => {
-         if (!error && rows.length > 0)
-             response.json(rows);
-         else
-             response.status(404).send('Not found');
-      });
+      return response.json(await Employed.findAll());
   }  catch (e) {
       response.status(500).send(e.message)
   }
 };
 
 const getEmployed = async (request, response) => {
-  try {
-      const { id } = request.params;
-      await mysqlConnection.query('select * from employees where id = ?', [id], (error, rows, fields) => {
-          if (!error && rows.length > 0)
-              response.json(rows);
-          else
-              response.status(404).send('Not found');
-      })
-  }  catch (e) {
-      response.status(500).send(e.message)
-  }
+    try {
+        const employed = await Employed.findAll({
+            where: { id: request.params.id }
+        });
+
+        if (employed === null)
+            return response.status(400).send('Not found');
+
+        return response.json(employed);
+    }  catch (e) {
+        response.status(500).send(e.message)
+    }
 };
 
 const createEmployed = async (request, response) => {
     try {
-        const { name, salary } = request.body;
-        await mysqlConnection.query('insert into employees (name, salary) values (?, ?)', [name, salary], (error, rows, fields) => {
-            if (!error)
-                response.status(200).send('Created');
-            else
-                response.status(500).send(error.message)
+        const employed = await Employed.create(request.body);
 
-        })
+        return response.status(200).send(response.json(employed));
     } catch (e) {
         response.status(500).send(e.message)
     }
@@ -58,13 +37,14 @@ const createEmployed = async (request, response) => {
 
 const updateEmployed = async (request, response) => {
     try {
-        await mysqlConnection.query('update employees set ? where id = ?', [request.body, request.params.id], (error, rows, fields) => {
-            if (!error)
-                response.status(200).send('Updated');
-            else
-                response.status(500).send(error.message)
+        const employed = await Employed.update(request.body, {
+            where: { id: request.params.id }
+        });
 
-        })
+        if (employed === null)
+            return response.status(404).send('Not Found');
+
+        return response.status(200).send('Success')
     } catch (e) {
         response.status(500).send(e.message)
     }
@@ -72,17 +52,19 @@ const updateEmployed = async (request, response) => {
 
 const deleteEmployed = async (request, response) => {
     try {
-        await mysqlConnection.query('delete from employees where id = ?', [request.params.id], (error, rows, fields) => {
-            if (!error)
-                response.status(200).send('Deleted');
-            else
-                response.status(500).send(error.message)
+        const employed = await Employed.destroy({
+            where: { id: request.params.id }
+        });
 
-        })
+        if (employed === null)
+            return response.status(404).send('Not Found');
+
+        return response.status(200).send('Success')
     } catch (e) {
         response.status(500).send(e.message)
     }
 };
+
 
 
 module.exports = {
