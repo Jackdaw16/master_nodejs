@@ -1,6 +1,6 @@
 'use strict';
 
-const { Employed } = require('../db');
+const { Employed, Responsable } = require('../db');
 
 const getAllEmployed = async (request, response) => {
   try {
@@ -12,8 +12,12 @@ const getAllEmployed = async (request, response) => {
 
 const getEmployed = async (request, response) => {
     try {
-        const employed = await Employed.findAll({
-            where: { id: request.params.id }
+        const employed = await Employed.findOne({
+            where: { id: request.params.id },
+            include: {
+                association: Responsable,
+                as: 'responsable'
+            }
         });
 
         if (employed === null)

@@ -1,19 +1,19 @@
-const Responsable = require('./responsable');
+const Employed = require('./employed');
 
 module.exports = (sequelize, type) => {
-  const Employed = sequelize.define('employees', {
+  const Responsable = sequelize.define('responsables', {
       id: {
           type: type.INTEGER,
           primaryKey: true,
           autoIncrement: true
       },
       name: type.STRING,
-      salary: type.DOUBLE,
+      project: type.STRING,
   });
 
-  Employed.belongsTo(Responsable);
+  Responsable.hasMany(Employed);
 
-  return Employed;
+  return Responsable;
 };
 
 
